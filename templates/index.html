@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/daisyui@3.9.2/dist/full.js"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="navbar bg-primary text-white mb-8">
+            <div class="flex-1">
+                <span class="text-xl font-bold">MongoDB Manager</span>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-xl p-6">
+            <h2 class="text-2xl font-semibold mb-4">Select Database and Collection</h2>
+
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text">Database</span>
+                </label>
+                <select id="databaseSelect" class="select select-bordered w-full max-w-xs">
+                    <option value="">Select a database</option>
+                </select>
+            </div>
+
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text">Collection</span>
+                </label>
+                <select id="collectionSelect" class="select select-bordered w-full max-w-xs">
+                    <option value="">Select a collection</option>
+                </select>
+            </div>
+
+            <div id="fieldsContainer" class="hidden mb-4">
+                <h3 class="text-xl font-semibold mb-4">Enter Document Fields</h3>
+                <div id="fieldsList">
+                </div>
+            </div>
+
+            <div class="flex gap-4 mb-4">
+                <button id="createDocumentBtn" class="btn btn-primary w-full">Create Document</button>
+                <button id="updateDocumentBtn" class="btn btn-warning w-full hidden">Update Document</button>
+                <button id="deleteDocumentBtn" class="btn btn-error w-full hidden">Delete Document</button>
+            </div>
+
+            <div id="error" class="alert alert-error hidden mb-4">
+                <span id="errorMessage"></span>
+            </div>
+
+            <div id="documentsTable" class="hidden">
+                <h3 class="text-lg font-semibold mb-4">Documents</h3>
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Document</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documentsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="flex justify-center p-4 hidden">
+            <span class="loading loading-spinner loading-lg"></span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

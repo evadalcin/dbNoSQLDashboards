@@ -1,0 +1,23 @@
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+.card {
+    border-radius: 8px;
+}
+
+select, input, button {
+    margin: 5px 0;
+}
+
+.hidden {
+    display: none;
+}
+
+.table th, .table td {
+    text-align: center;
+}
+
+.alert {
+    background-color: #F87171;
+}
