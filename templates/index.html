@@ -1,79 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MongoDB Manager</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/daisyui@3.9.2/dist/full.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.2/dist/full.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-base-200">
+<body class="min-h-screen bg-base-200">
+<div class="navbar bg-primary text-primary-content shadow-lg">
+    <div class="flex-1">
+        <span class="btn btn-ghost normal-case text-xl">MongoDB Manager</span>
+    </div>
+</div>
 
-    <div class="container mx-auto px-6 py-12">
-        <div class="navbar bg-primary text-white mb-8 shadow-xl rounded-lg">
-            <div class="flex-1">
-                <span class="text-2xl font-bold">MongoDB Manager</span>
-            </div>
-        </div>
+<div class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-center justify-center mb-6">Select Database and Collection</h2>
 
-        <div class="card bg-base-100 shadow-xl p-8 rounded-lg">
-            <h2 class="text-2xl font-semibold mb-6 text-center">Select Database and Collection</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Database</span>
+                    </label>
+                    <select id="databaseSelect" class="select select-bordered w-full">
+                        <option value="">Select a database</option>
+                    </select>
+                </div>
 
-            <div class="form-control mb-6">
-                <label class="label">
-                    <span class="label-text">Database</span>
-                </label>
-                <select id="databaseSelect" class="select select-bordered w-full max-w-xs">
-                    <option value="">Select a database</option>
-                </select>
-            </div>
-
-            <div class="form-control mb-6">
-                <label class="label">
-                    <span class="label-text">Collection</span>
-                </label>
-                <select id="collectionSelect" class="select select-bordered w-full max-w-xs">
-                    <option value="">Select a collection</option>
-                </select>
-            </div>
-
-            <div id="fieldsContainer" class="hidden mb-6">
-                <h3 class="text-xl font-semibold mb-4">Enter Document Fields</h3>
-                <div id="fieldsList" class="space-y-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Collection</span>
+                    </label>
+                    <select id="collectionSelect" class="select select-bordered w-full">
+                        <option value="">Select a collection</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="flex gap-4 mb-6 justify-center">
-                <button id="createDocumentBtn" class="btn btn-primary w-full max-w-xs hidden hover:bg-primary-focus">Create Document</button>
-                <button id="updateDocumentBtn" class="btn btn-warning w-full max-w-xs hidden hover:bg-warning-focus">Update Document</button>
-                <button id="deleteDocumentBtn" class="btn btn-error w-full max-w-xs hidden hover:bg-error-focus">Delete Document</button>
+            <div id="fieldsContainer">
+                <h3 class="text-lg font-semibold mb-4">Enter Document Fields</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">First Name</span>
+                        </label>
+                        <input type="text" id="firstName" placeholder="Enter firstName" class="input input-bordered"/>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Last Name</span>
+                        </label>
+                        <input type="text" id="lastName" placeholder="Enter lastName" class="input input-bordered"/>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Subject</span>
+                        </label>
+                        <input type="text" id="subject" placeholder="Enter subject" class="input input-bordered"/>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+                    <button id="createDocumentBtn" class="btn btn-primary">Create Document</button>
+                    <button id="updateDocumentBtn" class="btn btn-warning hidden">Update Document</button>
+                    <button id="deleteDocumentBtn" class="btn btn-error hidden">Delete Document</button>
+                </div>
             </div>
 
             <div id="error" class="alert alert-error hidden mb-6">
                 <span id="errorMessage"></span>
             </div>
 
-            <div id="documentsTable" class="hidden">
+            <div id="documentsTable">
                 <h3 class="text-lg font-semibold mb-4">Documents</h3>
-                <table class="table table-zebra w-full rounded-lg shadow-md">
-                    <thead class="bg-primary text-white">
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Document</th>
-                            <th>Actions</th>
+                            <th class="bg-primary text-primary-content">ID</th>
+                            <th class="bg-primary text-primary-content">Document</th>
+                            <th class="bg-primary text-primary-content text-center">Actions</th>
                         </tr>
-                    </thead>
-                    <tbody id="documentsBody">
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody id="documentsBody">
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-
-        <div id="loading" class="flex justify-center p-4 hidden">
-            <span class="loading loading-spinner loading-lg"></span>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center hidden">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
