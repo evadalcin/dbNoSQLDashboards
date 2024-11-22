@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchCollections(dbName);
         } else {
             collectionSelect.innerHTML = '<option value="">Select a collection</option>';
+            createDocumentBtn.classList.add('hidden'); // Hide the button if no db is selected
         }
     });
 
@@ -81,9 +82,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (dbName && collectionName) {
             fetchFields(dbName, collectionName);
             fetchDocuments(dbName, collectionName);
+            createDocumentBtn.classList.remove('hidden'); // Show button after selecting both DB and collection
         } else {
             fieldsContainer.classList.add('hidden');
             documentsTable.classList.add('hidden');
+            createDocumentBtn.classList.add('hidden'); // Hide button if collection is not selected
         }
     });
 

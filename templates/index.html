@@ -7,19 +7,19 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/daisyui@3.9.2/dist/full.js"></script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-base-200">
 
-    <div class="container mx-auto px-4 py-8">
-        <div class="navbar bg-primary text-white mb-8">
+    <div class="container mx-auto px-6 py-12">
+        <div class="navbar bg-primary text-white mb-8 shadow-xl rounded-lg">
             <div class="flex-1">
-                <span class="text-xl font-bold">MongoDB Manager</span>
+                <span class="text-2xl font-bold">MongoDB Manager</span>
             </div>
         </div>
 
-        <div class="card bg-base-100 shadow-xl p-6">
-            <h2 class="text-2xl font-semibold mb-4">Select Database and Collection</h2>
+        <div class="card bg-base-100 shadow-xl p-8 rounded-lg">
+            <h2 class="text-2xl font-semibold mb-6 text-center">Select Database and Collection</h2>
 
-            <div class="form-control mb-4">
+            <div class="form-control mb-6">
                 <label class="label">
                     <span class="label-text">Database</span>
                 </label>
@@ -28,7 +28,7 @@
                 </select>
             </div>
 
-            <div class="form-control mb-4">
+            <div class="form-control mb-6">
                 <label class="label">
                     <span class="label-text">Collection</span>
                 </label>
@@ -37,26 +37,26 @@
                 </select>
             </div>
 
-            <div id="fieldsContainer" class="hidden mb-4">
+            <div id="fieldsContainer" class="hidden mb-6">
                 <h3 class="text-xl font-semibold mb-4">Enter Document Fields</h3>
-                <div id="fieldsList">
+                <div id="fieldsList" class="space-y-4">
                 </div>
             </div>
 
-            <div class="flex gap-4 mb-4">
-                <button id="createDocumentBtn" class="btn btn-primary w-full">Create Document</button>
-                <button id="updateDocumentBtn" class="btn btn-warning w-full hidden">Update Document</button>
-                <button id="deleteDocumentBtn" class="btn btn-error w-full hidden">Delete Document</button>
+            <div class="flex gap-4 mb-6 justify-center">
+                <button id="createDocumentBtn" class="btn btn-primary w-full max-w-xs hidden hover:bg-primary-focus">Create Document</button>
+                <button id="updateDocumentBtn" class="btn btn-warning w-full max-w-xs hidden hover:bg-warning-focus">Update Document</button>
+                <button id="deleteDocumentBtn" class="btn btn-error w-full max-w-xs hidden hover:bg-error-focus">Delete Document</button>
             </div>
 
-            <div id="error" class="alert alert-error hidden mb-4">
+            <div id="error" class="alert alert-error hidden mb-6">
                 <span id="errorMessage"></span>
             </div>
 
             <div id="documentsTable" class="hidden">
                 <h3 class="text-lg font-semibold mb-4">Documents</h3>
-                <table class="table table-zebra w-full">
-                    <thead>
+                <table class="table table-zebra w-full rounded-lg shadow-md">
+                    <thead class="bg-primary text-white">
                         <tr>
                             <th>ID</th>
                             <th>Document</th>
@@ -69,7 +69,6 @@
             </div>
         </div>
 
-        <!-- Loading Spinner -->
         <div id="loading" class="flex justify-center p-4 hidden">
             <span class="loading loading-spinner loading-lg"></span>
         </div>
