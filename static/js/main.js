@@ -93,8 +93,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(documents => {
                 if (documents.length > 0) {
                     const firstDocument = documents[0];
-                    const fields = Object.keys(firstDocument);
-                    fieldsList.innerHTML = '';  
+                    const fields = Object.keys(firstDocument).filter(field => field !== '_id');
+                    fieldsList.innerHTML = '';
 
                     fields.forEach(field => {
                         const div = document.createElement('div');
