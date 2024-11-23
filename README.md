@@ -1,4 +1,4 @@
-# MongoDB Manager - Flask App
+# MongoDB Manager - Flask App for dbNoSQL course.
 
 A simple web application built with Flask for managing MongoDB databases. It allows users to view and manipulate databases, collections, and documents through a web interface.
 
