@@ -1,204 +1,182 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const databaseSelect = document.getElementById('databaseSelect');
-    const collectionSelect = document.getElementById('collectionSelect');
-    const fieldsContainer = document.getElementById('fieldsContainer');
-    const fieldsList = document.getElementById('fieldsList');
+    const mongoDatabaseSelect = document.getElementById('mongoDatabaseSelect');
+    const mongoCollectionSelect = document.getElementById('mongoCollectionSelect');
+    const mongoFieldsList = document.getElementById('mongoFieldsList');
+    const mongoDocumentsBody = document.getElementById('mongoDocumentsBody');
+    const createMongoDocumentBtn = document.getElementById('createMongoDocumentBtn');
+    const updateMongoDocumentBtn = document.getElementById('updateMongoDocumentBtn');
+    const deleteMongoDocumentBtn = document.getElementById('deleteMongoDocumentBtn');
+
+    const redisKeyInput = document.getElementById('redisKeyInput');
+    const redisValueInput = document.getElementById('redisValueInput');
+    const createRedisKeyBtn = document.getElementById('createRedisKeyBtn');
+    const deleteRedisKeyBtn = document.getElementById('deleteRedisKeyBtn');
+    const redisKeysBody = document.getElementById('redisKeysBody');
+
     const loading = document.getElementById('loading');
     const error = document.getElementById('error');
     const errorMessage = document.getElementById('errorMessage');
-    const documentsTable = document.getElementById('documentsTable');
-    const documentsBody = document.getElementById('documentsBody');
-    const createDocumentBtn = document.getElementById('createDocumentBtn');
-    const updateDocumentBtn = document.getElementById('updateDocumentBtn');
-    const deleteDocumentBtn = document.getElementById('deleteDocumentBtn');
 
-    let selectedDocId = null;
+    const mongoSection = document.getElementById('mongoSection');
+    const redisSection = document.getElementById('redisSection');
 
-    fetchDatabases();
+    let selectedMongoDocId = null;
 
-    function fetchDatabases() {
+    function handleError(err) {
+        loading.classList.add('hidden');
+        errorMessage.textContent = err.message || 'An error occurred';
+        error.classList.remove('hidden');
+        console.error(err);
+    }
+
+    window.showMongoSection = function() {
+        mongoSection.classList.remove('hidden');
+        redisSection.classList.add('hidden');
+        fetchMongoDatabases();
+    };
+
+    window.showRedisSection = function() {
+        mongoSection.classList.add('hidden');
+        redisSection.classList.remove('hidden');
+        fetchRedisKeys();
+    };
+
+    function fetchMongoDatabases() {
         loading.classList.remove('hidden');
         error.classList.add('hidden');
-        fetch('/api/databases')
+        fetch('/api/mongo/databases')
             .then(response => response.json())
             .then(data => {
                 loading.classList.add('hidden');
-                if (data.length === 0) {
-                    errorMessage.textContent = 'No databases found!';
-                    error.classList.remove('hidden');
-                } else {
-                    data.forEach(db => {
-                        const option = document.createElement('option');
-                        option.value = db;
-                        option.textContent = db;
-                        databaseSelect.appendChild(option);
-                    });
-                }
+                mongoDatabaseSelect.innerHTML = '<option value="">Select a database</option>';
+                data.forEach(db => {
+                    const option = document.createElement('option');
+                    option.value = db;
+                    option.textContent = db;
+                    mongoDatabaseSelect.appendChild(option);
+                });
             })
-            .catch(err => {
-                loading.classList.add('hidden');
-                errorMessage.textContent = 'Failed to fetch databases';
-                error.classList.remove('hidden');
-                console.error(err);
-            });
+            .catch(handleError);
     }
 
-    databaseSelect.addEventListener('change', function() {
+    mongoDatabaseSelect.addEventListener('change', function() {
         const dbName = this.value;
         if (dbName) {
-            fetchCollections(dbName);
-        } else {
-            collectionSelect.innerHTML = '<option value="">Select a collection</option>';
-            createDocumentBtn.classList.add('hidden'); // Hide the button if no db is selected
+            fetchMongoCollections(dbName);
         }
     });
 
-    function fetchCollections(dbName) {
+    function fetchMongoCollections(dbName) {
         loading.classList.remove('hidden');
-        error.classList.add('hidden');
-        fetch(`/api/collections/${dbName}`)
+        fetch(`/api/mongo/collections/${dbName}`)
             .then(response => response.json())
             .then(data => {
                 loading.classList.add('hidden');
-                collectionSelect.innerHTML = '<option value="">Select a collection</option>';
+                mongoCollectionSelect.innerHTML = '<option value="">Select a collection</option>';
                 data.forEach(collection => {
                     const option = document.createElement('option');
                     option.value = collection;
                     option.textContent = collection;
-                    collectionSelect.appendChild(option);
+                    mongoCollectionSelect.appendChild(option);
                 });
             })
-            .catch(err => {
-                loading.classList.add('hidden');
-                errorMessage.textContent = 'Failed to fetch collections';
-                error.classList.remove('hidden');
-                console.error(err);
-            });
+            .catch(handleError);
     }
 
-    collectionSelect.addEventListener('change', function() {
-        const dbName = databaseSelect.value;
+    function updateMongoFormFields(documents) {
+        mongoFieldsList.innerHTML = '';
+        if (documents.length > 0) {
+            const firstDoc = documents[0];
+            const fields = Object.keys(firstDoc).filter(field => field !== '_id');
+
+            fields.forEach(field => {
+                const div = document.createElement('div');
+                div.classList.add('form-control', 'mb-4');
+                div.innerHTML = `
+                    <label class="label">
+                        <span class="label-text">${field}</span>
+                    </label>
+                    <input type="text" id="mongo${field}" name="${field}" placeholder="Enter ${field}"
+                           class="input input-bordered w-full"/>
+                `;
+                mongoFieldsList.appendChild(div);
+            });
+
+            createMongoDocumentBtn.classList.remove('hidden');
+        }
+    }
+
+    mongoCollectionSelect.addEventListener('change', function() {
+        const dbName = mongoDatabaseSelect.value;
         const collectionName = this.value;
         if (dbName && collectionName) {
-            fetchFields(dbName, collectionName);
-            fetchDocuments(dbName, collectionName);
-            createDocumentBtn.classList.remove('hidden'); // Show button after selecting both DB and collection
-        } else {
-            fieldsContainer.classList.add('hidden');
-            documentsTable.classList.add('hidden');
-            createDocumentBtn.classList.add('hidden'); // Hide button if collection is not selected
+            fetchMongoDocuments(dbName, collectionName);
         }
     });
 
-    function fetchFields(dbName, collectionName) {
-        fetch(`/api/collections/${dbName}/${collectionName}/documents`)
-            .then(response => response.json())
-            .then(documents => {
-                if (documents.length > 0) {
-                    const firstDocument = documents[0];
-                    const fields = Object.keys(firstDocument).filter(field => field !== '_id');
-                    fieldsList.innerHTML = '';
-
-                    fields.forEach(field => {
-                        const div = document.createElement('div');
-                        div.classList.add('mb-4');
-                        div.innerHTML = `
-                            <label class="label"><span class="label-text">${field}</span></label>
-                            <input type="text" name="${field}" class="input input-bordered w-full" placeholder="Enter ${field}" />
-                        `;
-                        fieldsList.appendChild(div);
-                    });
-
-                    fieldsContainer.classList.remove('hidden');
-                }
-            })
-            .catch(err => {
-                console.error('Error fetching fields:', err);
-            });
-    }
-
-    function fetchDocuments(dbName, collectionName) {
+    function fetchMongoDocuments(dbName, collectionName) {
         loading.classList.remove('hidden');
-        fetch(`/api/collections/${dbName}/${collectionName}/documents`)
+        fetch(`/api/mongo/collections/${dbName}/${collectionName}/documents`)
             .then(response => response.json())
             .then(data => {
                 loading.classList.add('hidden');
-                documentsBody.innerHTML = '';
-                if (data.length === 0) {
-                    documentsTable.classList.add('hidden');
-                } else {
-                    documentsTable.classList.remove('hidden');
-                    data.forEach(doc => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${doc._id}</td>
-                            <td>${JSON.stringify(doc)}</td>
-                            <td>
-                                <button class="btn btn-warning btn-sm" onclick="editDocument('${doc._id}')">Edit</button>
-                                <button class="btn btn-error btn-sm" onclick="deleteDocument('${doc._id}')">Delete</button>
-                            </td>
-                        `;
-                        documentsBody.appendChild(row);
-                    });
-                }
+                mongoDocumentsBody.innerHTML = '';
+                data.forEach(doc => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${doc._id}</td>
+                        <td>${JSON.stringify(doc)}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editMongoDocument('${doc._id}')">Edit</button>
+                            <button class="btn btn-error btn-sm" onclick="deleteMongoDocument('${doc._id}')">Delete</button>
+                        </td>
+                    `;
+                    mongoDocumentsBody.appendChild(row);
+                });
+                updateMongoFormFields(data);
             })
-            .catch(err => {
-                loading.classList.add('hidden');
-                errorMessage.textContent = 'Failed to fetch documents';
-                error.classList.remove('hidden');
-                console.error(err);
-            });
+            .catch(handleError);
     }
 
-    window.editDocument = function(docId) {
-        selectedDocId = docId;
-        updateDocumentBtn.classList.remove('hidden');
-        deleteDocumentBtn.classList.remove('hidden');
-        createDocumentBtn.classList.add('hidden');
-        const dbName = databaseSelect.value;
-        const collectionName = collectionSelect.value;
-        fetch(`/api/collections/${dbName}/${collectionName}/documents/${docId}`)
-            .then(response => response.json())
-            .then(doc => {
-                document.querySelectorAll('#fieldsList input').forEach(input => {
-                    const fieldName = input.name;
-                    if (doc[fieldName]) {
-                        input.value = doc[fieldName];
-                    }
-                });
-            })
-            .catch(err => {
-                console.error('Error fetching document:', err);
-            });
+    window.editMongoDocument = function(docId) {
+        selectedMongoDocId = docId;
+        const dbName = mongoDatabaseSelect.value;
+        const collectionName = mongoCollectionSelect.value;
+
+        updateMongoDocumentBtn.classList.remove('hidden');
+        deleteMongoDocumentBtn.classList.remove('hidden');
+        createMongoDocumentBtn.classList.add('hidden');
     };
 
-    window.deleteDocument = function(docId) {
-        const dbName = databaseSelect.value;
-        const collectionName = collectionSelect.value;
-        fetch(`/api/collections/${dbName}/${collectionName}/documents/${docId}`, {
+    window.deleteMongoDocument = function(docId) {
+        const dbName = mongoDatabaseSelect.value;
+        const collectionName = mongoCollectionSelect.value;
+
+        fetch(`/api/mongo/collections/${dbName}/${collectionName}/documents/${docId}`, {
             method: 'DELETE'
         })
         .then(response => response.json())
         .then(result => {
             if (result.deleted_count > 0) {
                 alert('Document deleted successfully');
-                fetchDocuments(dbName, collectionName);
+                fetchMongoDocuments(dbName, collectionName);
             }
         })
-        .catch(err => {
-            console.error('Error deleting document:', err);
-        });
+        .catch(handleError);
     };
 
-    createDocumentBtn.addEventListener('click', function() {
-        const dbName = databaseSelect.value;
-        const collectionName = collectionSelect.value;
+    createMongoDocumentBtn.addEventListener('click', function() {
+        const dbName = mongoDatabaseSelect.value;
+        const collectionName = mongoCollectionSelect.value;
         const formData = {};
-        document.querySelectorAll('#fieldsList input').forEach(input => {
-            formData[input.name] = input.value;
+
+        mongoFieldsList.querySelectorAll('input').forEach(input => {
+            if (input.value.trim()) {
+                formData[input.name] = input.value;
+            }
         });
 
-        fetch(`/api/collections/${dbName}/${collectionName}/documents`, {
+        fetch(`/api/mongo/collections/${dbName}/${collectionName}/documents`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -208,22 +186,23 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(result => {
             alert('Document created successfully');
-            fetchDocuments(dbName, collectionName);
+            fetchMongoDocuments(dbName, collectionName);
         })
-        .catch(err => {
-            console.error('Error creating document:', err);
-        });
+        .catch(handleError);
     });
 
-    updateDocumentBtn.addEventListener('click', function() {
-        const dbName = databaseSelect.value;
-        const collectionName = collectionSelect.value;
+    updateMongoDocumentBtn.addEventListener('click', function() {
+        const dbName = mongoDatabaseSelect.value;
+        const collectionName = mongoCollectionSelect.value;
         const formData = {};
-        document.querySelectorAll('#fieldsList input').forEach(input => {
-            formData[input.name] = input.value;
+
+        mongoFieldsList.querySelectorAll('input').forEach(input => {
+            if (input.value.trim()) {
+                formData[input.name] = input.value;
+            }
         });
 
-        fetch(`/api/collections/${dbName}/${collectionName}/documents/${selectedDocId}`, {
+        fetch(`/api/mongo/collections/${dbName}/${collectionName}/documents/${selectedMongoDocId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -233,10 +212,99 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(result => {
             alert('Document updated successfully');
-            fetchDocuments(dbName, collectionName);
+            fetchMongoDocuments(dbName, collectionName);
         })
-        .catch(err => {
-            console.error('Error updating document:', err);
-        });
+        .catch(handleError);
     });
+
+    // Redis Functions
+    function fetchRedisKeys() {
+        loading.classList.remove('hidden');
+        fetch('/api/redis/keys')
+            .then(response => response.json())
+            .then(data => {
+                loading.classList.add('hidden');
+                redisKeysBody.innerHTML = '';
+                data.forEach(key => {
+                    fetch(`/api/redis/key/${key}`)
+                        .then(keyResponse => keyResponse.json())
+                        .then(keyData => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${key}</td>
+                                <td>${JSON.stringify(keyData.value)}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="editRedisKey('${key}')">Edit</button>
+                                    <button class="btn btn-error btn-sm" onclick="deleteRedisKey('${key}')">Delete</button>
+                                </td>
+                            `;
+                            redisKeysBody.appendChild(row);
+                        });
+                });
+            })
+            .catch(handleError);
+    }
+
+    window.editRedisKey = function(key) {
+        fetch(`/api/redis/key/${key}`)
+            .then(response => response.json())
+            .then(data => {
+                redisKeyInput.value = key;
+                redisValueInput.value = JSON.stringify(data.value, null, 2);
+            })
+            .catch(handleError);
+    };
+
+    window.deleteRedisKey = function(key) {
+        fetch(`/api/redis/key/${key}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.deleted_count > 0) {
+                alert('Key deleted successfully');
+                fetchRedisKeys();
+            }
+        })
+        .catch(handleError);
+    };
+
+    createRedisKeyBtn.addEventListener('click', function() {
+        const key = redisKeyInput.value.trim();
+        const value = redisValueInput.value.trim();
+
+        try {
+            const parsedValue = JSON.parse(value);
+            fetch('/api/redis/key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key, value: parsedValue })
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert('Key created/updated successfully');
+                fetchRedisKeys();
+            })
+            .catch(handleError);
+        } catch {
+            // If not JSON, treat as string
+            fetch('/api/redis/key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key, value })
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert('Key created/updated successfully');
+                fetchRedisKeys();
+            })
+            .catch(handleError);
+        }
+    });
+
+    showMongoSection();
 });

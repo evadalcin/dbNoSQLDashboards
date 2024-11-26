@@ -3,28 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MongoDB Manager</title>
+    <title>MongoDB and Redis Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.2/dist/full.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="min-h-screen bg-base-200">
 <div class="navbar bg-primary text-primary-content shadow-lg">
     <div class="flex-1">
-        <span class="btn btn-ghost normal-case text-xl">MongoDB Manager</span>
+        <span class="btn btn-ghost normal-case text-xl">MongoDB & Redis Dashboard</span>
     </div>
 </div>
 
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-4">
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-            <h2 class="card-title text-center justify-center mb-6">Select Database and Collection</h2>
+            <h2 class="card-title text-center">Select Database Type</h2>
+            <div class="flex justify-center space-x-4">
+                <button onclick="showMongoSection()" class="btn btn-primary">MongoDB</button>
+                <button onclick="showRedisSection()" class="btn btn-secondary">Redis</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mongoSection" class="container mx-auto px-4 py-8">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-center justify-center mb-6">MongoDB Manager</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="form-control">
                     <label class="label">
                         <span class="label-text font-medium">Database</span>
                     </label>
-                    <select id="databaseSelect" class="select select-bordered w-full">
+                    <select id="mongoDatabaseSelect" class="select select-bordered w-full">
                         <option value="">Select a database</option>
                     </select>
                 </div>
@@ -33,47 +45,24 @@
                     <label class="label">
                         <span class="label-text font-medium">Collection</span>
                     </label>
-                    <select id="collectionSelect" class="select select-bordered w-full">
+                    <select id="mongoCollectionSelect" class="select select-bordered w-full">
                         <option value="">Select a collection</option>
                     </select>
                 </div>
             </div>
 
-            <div id="fieldsContainer">
+            <div id="mongoFieldsContainer">
                 <h3 class="text-lg font-semibold mb-4">Enter Document Fields</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">First Name</span>
-                        </label>
-                        <input type="text" id="firstName" placeholder="Enter firstName" class="input input-bordered"/>
-                    </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">Last Name</span>
-                        </label>
-                        <input type="text" id="lastName" placeholder="Enter lastName" class="input input-bordered"/>
-                    </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">Subject</span>
-                        </label>
-                        <input type="text" id="subject" placeholder="Enter subject" class="input input-bordered"/>
-                    </div>
-                </div>
+                <div id="mongoFieldsList"></div>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-                    <button id="createDocumentBtn" class="btn btn-primary">Create Document</button>
-                    <button id="updateDocumentBtn" class="btn btn-warning hidden">Update Document</button>
-                    <button id="deleteDocumentBtn" class="btn btn-error hidden">Delete Document</button>
+                    <button id="createMongoDocumentBtn" class="btn btn-primary hidden">Create Document</button>
+                    <button id="updateMongoDocumentBtn" class="btn btn-warning hidden">Update Document</button>
+                    <button id="deleteMongoDocumentBtn" class="btn btn-error hidden">Delete Document</button>
                 </div>
             </div>
 
-            <div id="error" class="alert alert-error hidden mb-6">
-                <span id="errorMessage"></span>
-            </div>
-
-            <div id="documentsTable">
+            <div id="mongoDocumentsTable">
                 <h3 class="text-lg font-semibold mb-4">Documents</h3>
                 <div class="overflow-x-auto">
                     <table class="table table-zebra w-full">
@@ -84,17 +73,63 @@
                             <th class="bg-primary text-primary-content text-center">Actions</th>
                         </tr>
                         </thead>
-                        <tbody id="documentsBody">
-                        </tbody>
+                        <tbody id="mongoDocumentsBody"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center hidden">
-        <span class="loading loading-spinner loading-lg text-primary"></span>
+<div id="redisSection" class="container mx-auto px-4 py-8 hidden">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-center justify-center mb-6">Redis Key-Value Manager</h2>
+
+            <div class="form-control mb-6">
+                <label class="label">
+                    <span class="label-text font-medium">Key</span>
+                </label>
+                <input type="text" id="redisKeyInput" placeholder="Enter Redis Key" class="input input-bordered w-full"/>
+            </div>
+
+            <div class="form-control mb-6">
+                <label class="label">
+                    <span class="label-text font-medium">Value</span>
+                </label>
+                <textarea id="redisValueInput" placeholder="Enter Redis Value (JSON or String)" class="textarea textarea-bordered h-24"></textarea>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+                <button id="createRedisKeyBtn" class="btn btn-primary">Create/Update Key</button>
+                <button id="deleteRedisKeyBtn" class="btn btn-error">Delete Key</button>
+            </div>
+
+            <div id="redisKeysTable">
+                <h3 class="text-lg font-semibold mb-4">Redis Keys</h3>
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                        <tr>
+                            <th class="bg-primary text-primary-content">Key</th>
+                            <th class="bg-primary text-primary-content">Value</th>
+                            <th class="bg-primary text-primary-content text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="redisKeysBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+
+<div id="loading" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center hidden">
+    <span class="loading loading-spinner loading-lg text-primary"></span>
+</div>
+
+<div id="error" class="alert alert-error hidden mb-6 mx-4">
+    <span id="errorMessage"></span>
 </div>
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
